@@ -2,7 +2,7 @@ FROM ubuntu:focal as build
 
 ARG PYTHON_MAJOR_VERSION=3
 ARG PYTHON_MINOR_VERSION=8
-ARG REQUIRED_PACKAGES="python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}-minimal libpython${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}-minimal libpython${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}-stdlib  python${PYTHON_MAJOR_VERSION}-distutils nodejs=14.* openjdk-11-jdk-headless=11.0.11* graphviz ttf-dejavu fontconfig"
+ARG REQUIRED_PACKAGES="python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}-minimal libpython${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}-minimal libpython${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION}-stdlib  python${PYTHON_MAJOR_VERSION}-distutils nodejs=14.* openjdk-11-jre-headless=11.0.11* graphviz ttf-dejavu fontconfig"
 
 
 ENV ROOTFS /build/rootfs
@@ -34,7 +34,7 @@ RUN apt-get install -y ca-certificates \
 RUN cd ${BUILD_DEBS} \
   && for pkg in $REQUIRED_PACKAGES; do \
        apt-get download $pkg \
-         && apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances --no-pre-depends -i $pkg | grep -v jre-headless | grep '^[a-zA-Z0-9]' | xargs apt-get download ; \
+         && apt-cache depends --recurse --no-recommends --no-suggests --no-conflicts --no-breaks --no-replaces --no-enhances --no-pre-depends -i $pkg | grep -v 'openjdk-1[^1]-jre-headless' | grep '^[a-zA-Z0-9]' | xargs apt-get download ; \
      done
 RUN if [ "x$(ls ${BUILD_DEBS}/)" = "x" ]; then \
       echo No required packages specified; \
@@ -63,7 +63,7 @@ RUN pip3 install --upgrade --root ${ROOTFS} --force-reinstall mkdocs-techdocs-co
 RUN curl -o plantuml.jar -L http://sourceforge.net/projects/plantuml/files/plantuml.1.2021.12.jar/download && \
       echo "a3d10c17ab1158843a7a7120dd064ba2eda4363f  plantuml.jar" | sha1sum -c - && \
       mv plantuml.jar ${ROOTFS}/usr/local/plantuml.jar && \
-      echo $'#!/bin/sh\n\njava -jar '/usr/local/plantuml.jar' ${@}' >> ${ROOTFS}/usr/local/bin/plantuml && \
+      echo '#!/bin/sh\n\njava -jar '/usr/local/plantuml.jar' ${@}' >> ${ROOTFS}/usr/local/bin/plantuml && \
       chmod 755 ${ROOTFS}/usr/local/bin/plantuml
 
 FROM actions/bash:5.0-2
@@ -71,6 +71,7 @@ LABEL maintainer = "ilja+docker@bobkevic.com"
 
 ARG ROOTFS=/build/rootfs
 
+ENV PATH=${PATH}:/usr/lib/jvm/java-11-openjdk-arm64/bin
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
