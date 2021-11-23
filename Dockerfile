@@ -57,9 +57,7 @@ COPY entrypoint.sh ${ROOTFS}/usr/local/bin/entrypoint.sh
 RUN chmod +x ${ROOTFS}/usr/local/bin/entrypoint.sh
 
 RUN yarn global add npm --prefix /usr
-RUN npm install --unsafe-perm --force --prefix ${ROOTFS}/usr -g @techdocs/cli
-#RUN yarn config set cache-folder ${ROOTFS}/usr/.yarn && \
-#      yarn --no-default-rc --cwd ${ROOTFS}/usr global add @techdocs/cli --prefix ${ROOTFS}/usr
+RUN npm install --unsafe-perm --force --prefix ${ROOTFS}/usr -g @techdocs/cli@0.8.6
 RUN pip3 install --upgrade --root ${ROOTFS} --force-reinstall mkdocs-techdocs-core==0.*
 
 RUN curl -o plantuml.jar -L http://sourceforge.net/projects/plantuml/files/plantuml.1.2021.12.jar/download && \
